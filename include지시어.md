@@ -1,76 +1,79 @@
 
-# JSP에서의 include 지시어 및 날짜 처리
+# JSP에서의 `include` 지시어
 
-이번 예제는 JSP에서 `include` 지시어와 날짜 관련 클래스를 사용하는 방법을 다룹니다. 주요 핵심 개념을 정리하여 설명하겠습니다.
+JSP(JavaServer Pages)에서 `include` 지시어는 다른 JSP 파일을 포함시키는 데 사용됩니다. 이는 페이지가 요청될 때마다 포함된 파일의 내용이 삽입되도록 하여 코드 재사용과 모듈화를 가능하게 합니다. 이번 글에서는 JSP에서 `include` 지시어의 사용 방법과 그 특징에 대해 다룹니다.
 
-## 1. `<%@ page %>` 지시어
-JSP 파일에서 `<%@ page %>` 지시어는 페이지의 설정을 정의합니다. 여기서는 `language`, `contentType`, `pageEncoding` 속성을 사용하고 있습니다.
+## 1. `<%@ include %>` 지시어
+`<%@ include %>` 지시어는 다른 JSP 파일을 현재 JSP 페이지에 포함시키는 데 사용됩니다. 이때 포함된 파일은 페이지가 요청될 때마다 삽입됩니다.
+
+### 사용법
+```jsp
+<%@ include file="파일명.jsp" %>
+```
+
+- `file`: 포함할 JSP 파일의 경로입니다. 이 경로는 상대 경로를 사용하거나 절대 경로를 사용할 수 있습니다.
+- 이 지시어는 **정적 포함**(static inclusion) 방식입니다. 즉, 페이지가 요청될 때 포함되는 파일이 한 번만 처리됩니다.
 
 ### 예시
 ```jsp
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="header.jsp" %>
+<%@ include file="footer.jsp" %>
 ```
-- `language="java"`: JSP에서 사용하는 프로그래밍 언어를 지정합니다. 기본적으로 Java로 설정됩니다.
-- `contentType="text/html; charset=UTF-8"`: 응답의 콘텐츠 타입과 문자 인코딩을 설정합니다.
-- `pageEncoding="UTF-8"`: JSP 파일 자체의 문자 인코딩을 설정합니다.
 
-## 2. `<%@ page import %>` 지시어
-`import` 지시어는 JSP 페이지에서 사용할 Java 클래스를 임포트하는 데 사용됩니다.
+위의 코드에서는 `header.jsp`와 `footer.jsp` 파일을 각각 포함시킵니다. 이 파일들은 현재 JSP 페이지가 요청될 때마다 삽입됩니다.
+
+## 2. `<jsp:include>` 액션 태그
+`<jsp:include>` 액션 태그는 `include` 지시어와 유사하게 다른 JSP 파일을 포함하지만, 동적 포함(dynamic inclusion)을 지원합니다. 즉, 요청 시마다 포함된 파일을 실행하여 그 결과를 현재 페이지에 삽입합니다.
+
+### 사용법
+```jsp
+<jsp:include page="파일명.jsp" />
+```
+
+- `page`: 포함할 JSP 파일의 경로입니다. 이 경로도 상대 경로나 절대 경로를 사용할 수 있습니다.
 
 ### 예시
 ```jsp
-<%@ page import="java.time.LocalDateTime" %>
-<%@ page import="java.time.LocalDate" %>
+<jsp:include page="header.jsp" />
+<jsp:include page="footer.jsp" />
 ```
-- `java.time.LocalDate`와 `java.time.LocalDateTime` 클래스를 임포트하여 날짜와 시간을 다루기 위한 객체를 사용할 수 있습니다.
 
-## 3. 날짜 처리: `LocalDate`와 `LocalDateTime`
-- `LocalDate`: 날짜 정보를 다루는 클래스입니다. 시간 정보는 포함되지 않습니다.
-- `LocalDateTime`: 날짜와 시간 정보를 모두 포함하는 클래스입니다.
+`<jsp:include>`는 **동적 포함**(dynamic inclusion) 방식으로, 포함되는 페이지가 실행되어 그 결과가 삽입됩니다. 이 방식은 파일을 포함할 때마다 실행되며, 포함된 파일의 콘텐츠를 즉시 반영합니다.
 
-### 예시
+## 3. `include`와 `jsp:include` 차이점
+
+| 특징               | `<%@ include %>`                | `<jsp:include />`                    |
+|--------------------|----------------------------------|--------------------------------------|
+| 포함 방식          | 정적 포함 (static inclusion)      | 동적 포함 (dynamic inclusion)        |
+| 처리 시점          | 페이지 컴파일 시 처리           | 요청 시마다 처리                     |
+| 성능               | 더 빠르며, 서버 리소스를 절약   | 매번 실행되므로 다소 성능 부하 있음 |
+| 사용 용도          | 코드 재사용, 고정적인 콘텐츠    | 동적인 콘텐츠 또는 파일 분리        |
+
+## 4. `include` 지시어 사용 예시
+
+### 예시 1: 공통 헤더 및 푸터 포함
 ```jsp
-<%
-LocalDate today = LocalDate.now();
-LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
-%>
+<%@ include file="header.jsp" %>
+<p>여기에 페이지 내용이 들어갑니다.</p>
+<%@ include file="footer.jsp" %>
 ```
-- `LocalDate.now()`는 현재 날짜를 반환합니다.
-- `LocalDateTime.now().plusDays(1)`은 현재 시간에서 하루를 더한 날짜와 시간을 반환합니다.
 
-## 4. `<%@ include %>` 지시어
-`<%@ include %>` 지시어는 다른 JSP 파일을 현재 JSP 페이지에 포함할 때 사용됩니다. 이는 페이지가 요청될 때마다 포함된 파일의 내용이 삽입됩니다.
-
-### 예시
+### 예시 2: 동적 내용 포함
 ```jsp
-<%@ include file="IncludeFile.jsp" %>
+<jsp:include page="getWeather.jsp" />
 ```
-- `IncludeFile.jsp`라는 파일을 현재 페이지에 포함시킵니다. 이 때 포함된 파일은 요청 시마다 실행됩니다.
+위의 코드에서는 `getWeather.jsp` 파일을 동적으로 포함시켜 날씨 정보를 표시할 수 있습니다. 이 경우 요청 시마다 `getWeather.jsp`가 실행되어 최신 정보가 표시됩니다.
 
-## 5. 출력: `out.println()`
-JSP에서는 `out.println()`을 사용하여 클라이언트에게 데이터를 출력할 수 있습니다. 여기서는 오늘 날짜와 내일 날짜를 출력하고 있습니다.
+## 5. `include` 사용 시 주의사항
 
-### 예시
-```jsp
-<%
-out.println("오늘 날짜 :"+today);
-out.println("내일 날짜: "+tomorrow);
-%>
-```
-- `today`와 `tomorrow`는 각각 `LocalDate`와 `LocalDateTime` 객체로 생성된 날짜 정보를 출력합니다.
+- **정적 포함과 동적 포함의 차이**: `include` 지시어는 정적 포함이므로 포함되는 파일은 서버에서 미리 처리된 결과가 삽입됩니다. 반면에 `<jsp:include>`는 동적으로 파일을 실행하여 삽입되므로 실행 결과가 매번 달라질 수 있습니다.
+- **성능 고려**: `include` 지시어는 정적 포함이므로 성능상 유리하지만, 동적 포함을 통해 외부 파일에서 동적인 콘텐츠를 삽입해야 하는 경우 `<jsp:include>`를 사용하는 것이 적합합니다.
+- **파일 경로**: `file` 속성에 지정하는 경로는 상대 경로로 지정할 수 있으며, 올바른 경로를 지정하는 것이 중요합니다.
 
-## 6. 전체 코드 흐름
-1. JSP 페이지가 요청되면, `LocalDate`와 `LocalDateTime` 객체가 생성됩니다.
-2. `IncludeFile.jsp`가 포함됩니다.
-3. `today`와 `tomorrow`의 날짜 정보가 `out.println()`을 통해 출력됩니다.
+## 6. 결론
 
-## 7. 핵심 개념 정리
-- **`<%@ page %>`**: JSP 페이지의 설정을 지정합니다.
-- **`<%@ page import %>`**: JSP에서 사용할 Java 클래스를 임포트합니다.
-- **`<%@ include %>`**: 다른 JSP 파일을 포함합니다.
-- **`LocalDate`와 `LocalDateTime`**: 날짜와 시간을 다루는 Java 클래스로 날짜 처리에 사용됩니다.
-- **`out.println()`**: 데이터를 클라이언트에게 출력하는 방법입니다.
+JSP에서 `include` 지시어와 `<jsp:include>` 태그는 코드 재사용과 모듈화에 매우 유용한 도구입니다. 
+- `include` 지시어는 페이지 컴파일 시 정적으로 포함될 파일을 처리하며, 
+- `<jsp:include>`는 요청 시마다 동적으로 포함할 파일을 처리하여 실행 결과를 삽입합니다.
 
-## 결론
-JSP에서 `include` 지시어를 사용하여 다른 파일을 포함하고, 날짜와 시간 처리를 위해 `LocalDate`와 `LocalDateTime` 클래스를 사용하여 동적인 페이지를 구성할 수 있습니다. `out.println()`을 통해 화면에 출력된 날짜를 확인할 수 있습니다.
-```
+이 두 가지 방법을 잘 활용하면 JSP 페이지를 효율적으로 구성할 수 있습니다.
